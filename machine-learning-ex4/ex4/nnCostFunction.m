@@ -34,23 +34,39 @@ Theta2_grad = zeros(size(Theta2));
 % Instructions: You should complete the code by working through the
 %               following parts.
 %
-
-%=======forword
-X = [ones(m,1) X];
-z2 = X*Theta1';
-a2 = sigmoid(z2);
-a2 = [ones(m,1) a2];
-z3 = a2*Theta2';
-a3 = sigmoid(z3);
-[pp,I] = max(a3,[],2);
-p = I;
-
-%============
-
-%============
+[p, a3] = forward(X,Theta1,Theta2);
 yy = labelConv(y, num_labels);
 temp = (-1*yy).*log(a3) - (1-yy).*log(1-a3);
 J = sum(temp(:))/m;
+theta1 = Theta1;
+theta1(:,1) = 0;
+theta2 = Theta2;
+theta2(:,1) = 0;
+
+regularization = (sum((theta1.^2)(:)) + sum((theta2.^2)(:)))*lambda/(2*m);
+
+J = J + regularization;
+Delta2 = zeros(size(Theta2, 1), size(Theta2,2) -1);
+Delta1 = zeros(size(Theta1, 1), size(Theta1,2) -1);
+for t = 1:m
+  %1
+  a1 = X(t,:);
+  yk = yy(t,:);
+  [p, a3, z3, a2, z2] = forward(X(t,:), Theta1, Theta2);
+  %2
+  delta3 = (a3-yk)';
+  %3
+  temp = (Theta2'*delta3);
+  temp = temp(2:end);
+  delta2 = temp .*(sigmoidGradient(z2)');
+  %4
+  Delta2 = Delta2 + delta3*a2(2:end);
+  Delta1 = Delta1 + delta2*a1;
+endfor
+  Theta1_grad = Delta1./m;
+  Theta2_grad = Delta2./m;
+  %size(Theta1_grad)
+  %size(Theta2_grad)
 
 % Part 1: Feedforward the neural network and return the cost in the
 %         variable J. After implementing Part 1, you can verify that your
