@@ -18,6 +18,7 @@ function [J grad] = nnCostFunction(nn_params, ...
 % for our 2 layer neural network
 Theta1 = reshape(nn_params(1:hidden_layer_size * (input_layer_size + 1)), ...
                  hidden_layer_size, (input_layer_size + 1));
+                 
 
 Theta2 = reshape(nn_params((1 + (hidden_layer_size * (input_layer_size + 1))):end), ...
                  num_labels, (hidden_layer_size + 1));
@@ -29,6 +30,7 @@ m = size(X, 1);
 J = 0;
 Theta1_grad = zeros(size(Theta1));
 Theta2_grad = zeros(size(Theta2));
+
 
 % ====================== YOUR CODE HERE ======================
 % Instructions: You should complete the code by working through the
@@ -46,11 +48,14 @@ theta2(:,1) = 0;
 regularization = (sum((theta1.^2)(:)) + sum((theta2.^2)(:)))*lambda/(2*m);
 
 J = J + regularization;
-Delta2 = zeros(size(Theta2, 1), size(Theta2,2) -1);
-Delta1 = zeros(size(Theta1, 1), size(Theta1,2) -1);
+Delta2 = zeros(size(Theta2, 1), size(Theta2,2));
+
+Delta1 = zeros(size(Theta1, 1), size(Theta1,2));
+
 for t = 1:m
   %1
   a1 = X(t,:);
+  a1 = [1 a1];
   yk = yy(t,:);
   [p, a3, z3, a2, z2] = forward(X(t,:), Theta1, Theta2);
   %2
@@ -58,13 +63,16 @@ for t = 1:m
   %3
   temp = (Theta2'*delta3);
   temp = temp(2:end);
-  delta2 = temp .*(sigmoidGradient(z2)');
+  delta2 = temp .*(sigmoidGradient(z2'));
   %4
-  Delta2 = Delta2 + delta3*a2(2:end);
+  Delta2 = Delta2 + delta3*a2;
   Delta1 = Delta1 + delta2*a1;
 endfor
   Theta1_grad = Delta1./m;
   Theta2_grad = Delta2./m;
+  size(Theta1_grad)
+  size(Theta2_grad)
+
   %size(Theta1_grad)
   %size(Theta2_grad)
 
